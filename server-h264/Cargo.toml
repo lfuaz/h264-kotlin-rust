@@ -1,0 +1,26 @@
+[package]
+name = "h264-viewer"
+version = "0.1.0"
+edition = "2021"
+description = "Windows application that receives H.264 video over TCP and displays it in real-time"
+
+[dependencies]
+# Window creation and event loop (0.30 uses raw-window-handle 0.6)
+winit = "0.30"
+# Software framebuffer (0.4 uses raw-window-handle 0.6 — matches winit 0.30)
+softbuffer = "0.4"
+# H.264 decoding (pure Rust wrapper around Cisco OpenH264)
+openh264 = "0.6"
+# Async TCP
+tokio = { version = "1", features = ["full"] }
+# Logging
+log = "0.4"
+env_logger = "0.11"
+# Error handling
+anyhow = "1"
+# Thread-safe communication
+crossbeam-channel = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = true

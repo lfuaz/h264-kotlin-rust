@@ -1,0 +1,75 @@
+# Build directories
+build/
+target/
+dist/
+
+# Android
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+.gradle/
+gradle-wrapper.jar
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+local.properties
+*.jks
+*.keystore
+captures/
+.externalNativeBuild
+.cxx/
+.lintOptions
+
+# Kotlin
+.kotlin/
+
+# Rust
+Cargo.lock
+target/
+**/*.rs.bk
+.cargo/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# OS
+Thumbs.db
+.DS_Store
+*.log
+
+# Gradle
+.gradle/
+*.gradle.bak
+
+# Java
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mtj.tmp/
+*.mod
+*.sig
+*.so
+.asm/
