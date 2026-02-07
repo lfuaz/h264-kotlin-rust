@@ -45,6 +45,36 @@ cd server-h264
 cargo build --release
 ```
 
+## Development Workflow
+
+### Android Client
+
+**Build debug APK:**
+```bash
+cd client-h264
+.\gradlew.bat assembleDebug
+```
+
+**Install on device/emulator (Windows):**
+```bash
+adb -s [YOUR_IP:ADB_PORT] install -r app\build\outputs\apk\debug\app-debug.apk
+```
+
+Replace [YOUR_IP:ADB_PORT] with your device IP or emulator ID.
+
+**List connected devices:**
+```bash
+adb devices
+```
+
+### Rust Server
+
+**Build and run:**
+```bash
+cd server-h264
+cargo run --release
+```
+
 ## Development
 
 - **Client**: Android Studio with Kotlin
