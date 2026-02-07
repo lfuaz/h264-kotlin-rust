@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private var currentVideoWidth = 0
     private var currentVideoHeight = 0
     private var currentSensorRotation = 0
+    private var sensorRotationDetected = false
     private var isFrontCamera = false
 
     // ─── Lifecycle ──────────────────────────────────────────────────────
@@ -196,12 +197,16 @@ class MainActivity : AppCompatActivity() {
         cameraStreamer = CameraStreamer(this, surfaceTexture, selectedCameraId).apply {
             onResolutionDetected = { width, height, sensorRotation ->
                 runOnUiThread {
+                    // Sauvegarder immédiatement la rotation du capteur
+                    currentSensorRotation = sensorRotation
+                    sensorRotationDetected = true
+                    
                     // Utiliser post{} pour s'assurer que la TextureView est mesurée
                     textureView.post {
                         configureTransform(width, height, sensorRotation)
+                        // Envoyer la rotation initiale au viewer APRÈS configureTransform
+                        sendRotationToViewer()
                     }
-                    // Envoyer la rotation initiale au viewer
-                    sendRotationToViewer()
                 }
             }
             onEncodedFrame = { frameData ->
@@ -224,6 +229,8 @@ class MainActivity : AppCompatActivity() {
 
         tcpSender?.stop()
         tcpSender = null
+        
+        sensorRotationDetected = false
 
         runOnUiThread {
             buttonStream.text = "Démarrer"
@@ -308,9 +315,12 @@ class MainActivity : AppCompatActivity() {
      * L'encodeur H.264 produit toujours des frames dans l'orientation
      * native du capteur (paysage). Le viewer doit les tourner pour
      * correspondre à l'orientation réelle du téléphone.
+     *
+     * IMPORTANT: La formule de rotation est différente pour les caméras
+     * avant et arrière à cause du mirroring du capteur avant.
      */
     private fun sendRotationToViewer() {
-        if (currentSensorRotation == 0) return // Pas encore détecté
+        if (!sensorRotationDetected) return // Pas encore détecté
 
         val displayRotation = windowManager.defaultDisplay.rotation
         val displayDegrees = when (displayRotation) {
@@ -321,8 +331,17 @@ class MainActivity : AppCompatActivity() {
             else -> 0
         }
 
-        val viewerRotation = (currentSensorRotation - displayDegrees + 360) % 360
-        Log.i(TAG, "Sending viewer rotation: ${viewerRotation}° (sensor=$currentSensorRotation, display=$displayDegrees)")
+        // Formule différente pour caméra avant vs arrière
+        // - Arrière: (sensorOrientation - displayDegrees + 360) % 360
+        // - Avant: le capteur est monté à l'envers (mirrored), donc la rotation
+        //   doit compenser dans l'autre sens
+        val viewerRotation = if (isFrontCamera) {
+            (currentSensorRotation + displayDegrees) % 360
+        } else {
+            (currentSensorRotation - displayDegrees + 360) % 360
+        }
+
+        Log.i(TAG, "Sending viewer rotation: ${viewerRotation}° (sensor=$currentSensorRotation, display=$displayDegrees, front=$isFrontCamera)")
 
         val payload = byteArrayOf(
             ((viewerRotation shr 8) and 0xFF).toByte(),
